@@ -1,0 +1,3 @@
+exports.rtcService = {
+  ...require("./source"),
+};

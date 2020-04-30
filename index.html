@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <title>live Demo</title>
+  </head>
+  <body>
+    <div id="main">
+      <div>
+        <h1>源列表</h1>
+        <div
+          v-for="(item,index) in sources"
+          :key="index"
+          style="display: inline-block;"
+          @click="selectSource(item.id)"
+        >
+          <img :src="item.thumbnail.toDataURL()" />
+          <h6>{{item.name}}</h6>
+        </div>
+      </div>
+      <div>
+        <h1>预览</h1>
+        <video width="400" height="300" ref="video"></video>
+      </div>
+      <div>
+        <h1>操作</h1>
+        <button @click="record">开始录制</button>
+        <button @click="stop">结束保存</button>
+      </div>
+    </div>
+    <script>
+      new Vue({
+        el: "#main",
+        data() {
+          return {
+            sources: [],
+            stream: null,
+            recoder: null,
+          };
+        },
+        mounted() {
+          setTimeout(async () => {
+            this.sources = await rtcService.getSources();
+          }, 1000);
+        },
+        methods: {
+          async selectSource(id) {
+            this.stream = await rtcService.getStream(id);
+            this.$refs.video.srcObject = this.stream;
+            this.$refs.video.play();
+          },
+          async record() {
+            if (!this.stream) return alert("请选择视频源");
+            this.recoder = await rtcService.record(
+              this.stream,
+              new Date().getTime() + ".mp4"
+            );
+          },
+          stop() {
+            this.recoder.stop();
+          },
+        },
+      });
+    </script>
+  </body>
+</html>
