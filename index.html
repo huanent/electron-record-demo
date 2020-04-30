@@ -55,7 +55,7 @@
             if (!this.stream) return alert("请选择视频源");
             this.recoder = await rtcService.record(
               this.stream,
-              new Date().getTime() + ".mp4"
+              new Date().getTime() + ".webm"
             );
           },
           stop() {
