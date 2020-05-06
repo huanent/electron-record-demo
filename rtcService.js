@@ -32,19 +32,23 @@ async function record(stream, path) {
     console.log("no audio devices");
   }
 
-  const options = { mimeType: "video/webm; codecs=vp9" };
+  const options = {
+    mimeType: "video/webm; codecs=vp9",
+    audioBitsPerSecond: 64000,
+    videoBitsPerSecond: 1200000,
+  };
   let mediaRecorder = new MediaRecorder(stream, options);
   const recordedChunks = [];
 
   mediaRecorder.ondataavailable = (e) => {
     recordedChunks.push(e.data);
-    console.log(e.data);
   };
 
   mediaRecorder.onstop = async function () {
     const blob = new Blob(recordedChunks, {
       type: "video/webm; codecs=vp9",
     });
+
     var chunkSize = 1024 * 1024; // 每片1M大小
     var offset = 0; // 偏移量
 
