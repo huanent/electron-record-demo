@@ -38,16 +38,26 @@ async function record(stream, path) {
 
   mediaRecorder.ondataavailable = (e) => {
     recordedChunks.push(e.data);
+    console.log(e.data);
   };
 
   mediaRecorder.onstop = async function () {
     const blob = new Blob(recordedChunks, {
       type: "video/webm; codecs=vp9",
     });
+    var chunkSize = 1024 * 1024; // 每片1M大小
+    var offset = 0; // 偏移量
 
-    const buffer = Buffer.from(await blob.arrayBuffer());
-
-    fs.writeFile(path, buffer, () => console.log("video saved successfully!"));
+    do {
+      var end = offset + chunkSize;
+      if (end > blob.size) end = blob.size;
+      var chunk = blob.slice(offset, end);
+      offset = end;
+      const buffer = Buffer.from(await chunk.arrayBuffer());
+      fs.appendFile(path, buffer, () =>
+        console.log(((offset * 100) / blob.size).toFixed(0) + "% video saved")
+      );
+    } while (offset < blob.size);
   };
 
   mediaRecorder.start();
