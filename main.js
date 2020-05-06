@@ -1,4 +1,6 @@
 const { app, BrowserWindow } = require("electron");
+const fs = require("fs");
+const path = require("path");
 
 function createWindow() {
   // 创建浏览器窗口
@@ -11,15 +13,12 @@ function createWindow() {
     },
   });
 
-  // 加载index.html文件
-  //win.loadURL("http://localhost:8080/");
-
   win.webContents.openDevTools();
-  win.webContents.executeJavaScript(`
-  let basePath = process.cwd();
-  window.rtcService = require(basePath + '/rtcService.js').rtcService;
-  `);
-  win.loadFile("./index.html");
+  const injectPath = path.join(__dirname, "/inject.js");
+  const jsCode = fs.readFileSync(injectPath, "utf8");
+  win.webContents.executeJavaScript(jsCode);
+  //win.loadURL("http://localhost:8080/");
+  win.loadFile(__dirname + "/index.html");
 }
 
 app.whenReady().then(createWindow);

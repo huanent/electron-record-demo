@@ -21,12 +21,16 @@ async function getStream(id) {
 }
 
 async function record(stream, path) {
-  var audio = await navigator.mediaDevices.getUserMedia({
-    audio: true,
-    video: false,
-  });
+  try {
+    var audio = await navigator.mediaDevices.getUserMedia({
+      audio: true,
+      video: false,
+    });
 
-  stream.addTrack(audio.getAudioTracks()[0]);
+    stream.addTrack(audio.getAudioTracks()[0]);
+  } catch (error) {
+    console.log("no audio devices");
+  }
 
   const options = { mimeType: "video/webm; codecs=vp9" };
   let mediaRecorder = new MediaRecorder(stream, options);

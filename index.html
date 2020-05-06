@@ -40,10 +40,10 @@
             recoder: null,
           };
         },
-        mounted() {
-          setTimeout(async () => {
+        async mounted() {
+          onRtcAvailable = async () => {
             this.sources = await rtcService.getSources();
-          }, 1000);
+          };
         },
         methods: {
           async selectSource(id) {
