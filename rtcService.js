@@ -21,6 +21,7 @@ async function getStream(id) {
 }
 
 async function record(stream, path) {
+  var startTime = Date.now();
   try {
     var audio = await navigator.mediaDevices.getUserMedia({
       audio: true,
@@ -35,7 +36,7 @@ async function record(stream, path) {
   const options = {
     mimeType: "video/webm; codecs=vp9",
     audioBitsPerSecond: 64000,
-    videoBitsPerSecond: 1200000,
+    videoBitsPerSecond: 600000,
   };
   let mediaRecorder = new MediaRecorder(stream, options);
   const recordedChunks = [];
@@ -45,23 +46,25 @@ async function record(stream, path) {
   };
 
   mediaRecorder.onstop = async function () {
-    const blob = new Blob(recordedChunks, {
+    const bb = new Blob(recordedChunks, {
       type: "video/webm; codecs=vp9",
     });
 
-    var chunkSize = 1024 * 1024; // 每片1M大小
-    var offset = 0; // 偏移量
+    require("./fix-webm-duration")(bb, Date.now() - startTime, async (blob) => {
+      var chunkSize = 1024 * 1024; // 每片1M大小
+      var offset = 0; // 偏移量
 
-    do {
-      var end = offset + chunkSize;
-      if (end > blob.size) end = blob.size;
-      var chunk = blob.slice(offset, end);
-      offset = end;
-      const buffer = Buffer.from(await chunk.arrayBuffer());
-      fs.appendFile(path, buffer, () =>
-        console.log(((offset * 100) / blob.size).toFixed(0) + "% video saved")
-      );
-    } while (offset < blob.size);
+      do {
+        var end = offset + chunkSize;
+        if (end > blob.size) end = blob.size;
+        var chunk = blob.slice(offset, end);
+        offset = end;
+        const buffer = Buffer.from(await chunk.arrayBuffer());
+        fs.appendFile(path, buffer, () =>
+          console.log(((offset * 100) / blob.size).toFixed(0) + "% video saved")
+        );
+      } while (offset < blob.size);
+    });
   };
 
   mediaRecorder.start();
