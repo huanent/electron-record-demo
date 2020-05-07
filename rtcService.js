@@ -1,5 +1,6 @@
 const { desktopCapturer } = require("electron");
 const fs = require("fs");
+const fixWebmDuration = require("fix-webm-duration");
 
 async function getSources() {
   const sources = await desktopCapturer.getSources({
@@ -50,7 +51,7 @@ async function record(stream, path) {
       type: "video/webm; codecs=vp9",
     });
 
-    require("./fix-webm-duration")(bb, Date.now() - startTime, async (blob) => {
+    fixWebmDuration(bb, Date.now() - startTime, async (blob) => {
       var chunkSize = 1024 * 1024; // 每片1M大小
       var offset = 0; // 偏移量
 
