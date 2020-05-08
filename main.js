@@ -19,13 +19,16 @@ function createWindow() {
     win.show();
   });
 
+  win.webContents.on("dom-ready", (_) => {
+    const injectPath = path.join(__dirname, "/inject.js");
+    const jsCode = fs.readFileSync(injectPath, "utf8");
+    win.webContents.executeJavaScript(jsCode);
+  });
+
   win.loadURL("http://localhost:8080/");
   //win.loadFile(__dirname + "/index.html");
 
   //win.webContents.openDevTools();
-  const injectPath = path.join(__dirname, "/inject.js");
-  const jsCode = fs.readFileSync(injectPath, "utf8");
-  win.webContents.executeJavaScript(jsCode);
 }
 
 app.whenReady().then(createWindow);
