@@ -24,7 +24,6 @@ async function getStream(id) {
 }
 
 async function record(stream, filename) {
-  let filePath = path.join(getRecordSavePath(), filename + ".webm");
   let startTime = 0;
   try {
     var audio = await navigator.mediaDevices.getUserMedia({
@@ -64,13 +63,15 @@ async function record(stream, filename) {
         var chunk = blob.slice(offset, end);
         offset = end;
         const buffer = Buffer.from(await chunk.arrayBuffer());
-
+        let filePath = path.join(getRecordSavePath(), filename + ".webm");
+        const dir = path.dirname(filePath);
+        if (!fs.existsSync(dir)) fs.mkdirSync(dir);
         fs.appendFile(filePath, buffer, () =>
           console.log(((offset * 100) / blob.size).toFixed(0) + "% video saved")
         );
       } while (offset < blob.size);
 
-      openRecordSaveFolder()
+      openRecordSaveFolder();
     });
   };
 
