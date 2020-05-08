@@ -1,5 +1,7 @@
-const { desktopCapturer } = require("electron");
+const { desktopCapturer, remote } = require("electron");
 const fs = require("fs");
+const os = require("os");
+const path = require("path");
 const fixWebmDuration = require("fix-webm-duration");
 
 async function getSources() {
@@ -21,8 +23,9 @@ async function getStream(id) {
   });
 }
 
-async function record(stream, path) {
-  var startTime = Date.now();
+async function record(stream, filename) {
+  let filePath = path.join(getRecordSavePath(), filename + ".webm");
+  let startTime = 0;
   try {
     var audio = await navigator.mediaDevices.getUserMedia({
       audio: true,
@@ -61,19 +64,54 @@ async function record(stream, path) {
         var chunk = blob.slice(offset, end);
         offset = end;
         const buffer = Buffer.from(await chunk.arrayBuffer());
-        fs.appendFile(path, buffer, () =>
+
+        fs.appendFile(filePath, buffer, () =>
           console.log(((offset * 100) / blob.size).toFixed(0) + "% video saved")
         );
       } while (offset < blob.size);
+
+      openRecordSaveFolder()
     });
   };
 
+  startTime = Date.now();
   mediaRecorder.start();
   return mediaRecorder;
+}
+
+async function selectRecordSavePath() {
+  return new Promise(async (rs, rj) => {
+    let result = await remote.dialog.showOpenDialog(null, {
+      defaultPath: getRecordSavePath(),
+      properties: ["openDirectory", "createDirectory", "promptToCreate"],
+    });
+
+    if (result.canceled || !result.filePaths.length) rs(undefined);
+    else {
+      let path = result.filePaths[0];
+      localStorage.setItem("record_save_path", path);
+      rs(path);
+    }
+  });
+}
+
+function getRecordSavePath() {
+  let defaultPath = localStorage.getItem("record_save_path");
+  console.log(defaultPath);
+  if (defaultPath) return defaultPath;
+  defaultPath = path.join(os.homedir(), "record_video");
+  if (!fs.existsSync(defaultPath)) fs.mkdirSync(defaultPath);
+  localStorage.setItem("record_save_path", defaultPath);
+  return defaultPath;
+}
+
+function openRecordSaveFolder() {
+  remote.shell.openItem(getRecordSavePath());
 }
 
 exports.rtcService = {
   getSources,
   getStream,
   record,
+  selectRecordSavePath,
 };

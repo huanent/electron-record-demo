@@ -15,10 +15,10 @@ function createWindow() {
 
   win.maximize();
 
-  win.once('ready-to-show', () => {
-    win.show()
-  })
-  
+  win.once("ready-to-show", () => {
+    win.show();
+  });
+
   win.loadURL("http://localhost:8080/");
   //win.loadFile(__dirname + "/index.html");
 
@@ -26,7 +26,6 @@ function createWindow() {
   const injectPath = path.join(__dirname, "/inject.js");
   const jsCode = fs.readFileSync(injectPath, "utf8");
   win.webContents.executeJavaScript(jsCode);
-  
 }
 
 app.whenReady().then(createWindow);

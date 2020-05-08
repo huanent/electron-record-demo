@@ -1,6 +1,7 @@
 const path = require("path");
 const fs = require("fs");
 const basePath = process.cwd();
+console.log(process)
 let rtcServicePath = path.join(basePath, "rtcService.js");
 
 if (!fs.existsSync(rtcServicePath)) {

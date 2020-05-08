@@ -28,6 +28,7 @@
         <h1>操作</h1>
         <button @click="record">开始录制</button>
         <button @click="stop">结束保存</button>
+        <button @click="selectPath">路径选择器</button>
       </div>
     </div>
     <script>
@@ -60,6 +61,9 @@
           },
           stop() {
             this.recoder.stop();
+          },
+          async selectPath() {
+            console.log(await rtcService.selectRecordSavePath());
           },
         },
       });
