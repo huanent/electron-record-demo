@@ -106,8 +106,10 @@ function getRecordSavePath() {
   return defaultPath;
 }
 
-function openRecordSaveFolder() {
-  remote.shell.openItem(getRecordSavePath());
+function openRecordSaveFolder(folder) {
+  var savePath = getRecordSavePath();
+  if (folder) savePath = path.join(savePath, folder);
+  remote.shell.openItem(savePath);
 }
 
 exports.rtcService = {
