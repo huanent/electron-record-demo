@@ -5,7 +5,8 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "pack": "electron-packager ./ kblive --platform=darwin --arch=x64 --asar --overwrite --out=bin"
+    "pack-win": "electron-packager ./ kblive --platform=win32 --arch=x64 --asar --overwrite --out=bin",
+    "pack-mac": "electron-packager ./ kblive --platform=darwin --arch=x64 --asar --overwrite --out=bin"
   },
   "keywords": [],
   "author": "",
