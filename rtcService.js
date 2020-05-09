@@ -1,8 +1,8 @@
 const { desktopCapturer, remote } = require("electron");
 const fs = require("fs");
-const os = require("os");
 const path = require("path");
 const fixWebmDuration = require("fix-webm-duration");
+const Settings = require("./settings");
 
 async function getSources() {
   const sources = await desktopCapturer.getSources({
@@ -18,7 +18,7 @@ async function getStream(id) {
       mandatory: {
         chromeMediaSource: "desktop",
         chromeMediaSourceId: id, //"screen:0:0",
-      },
+      }
     },
   });
 }
@@ -90,20 +90,31 @@ async function selectRecordSavePath() {
     if (result.canceled || !result.filePaths.length) rs(undefined);
     else {
       let path = result.filePaths[0];
-      localStorage.setItem("record_save_path", path);
+      const settings = Settings.load();
+      settings.savePath = path;
+      Settings.save(settings);
       rs(path);
     }
   });
 }
 
 function getRecordSavePath() {
-  let defaultPath = localStorage.getItem("record_save_path");
-  console.log(defaultPath);
-  if (defaultPath) return defaultPath;
-  defaultPath = path.join(os.homedir(), "record_video");
-  if (!fs.existsSync(defaultPath)) fs.mkdirSync(defaultPath);
-  localStorage.setItem("record_save_path", defaultPath);
-  return defaultPath;
+  const settings = Settings.load();
+
+  if (!settings.savePath) {
+    settings.savePath = path.join(
+      remote.app.getPath("documents"),
+      "classVideos"
+    );
+
+    Settings.save(settings);
+  }
+
+  if (!fs.existsSync(settings.savePath)) {
+    fs.mkdirSync(settings.savePath);
+  }
+
+  return settings.savePath;
 }
 
 function openRecordSaveFolder(folder) {
